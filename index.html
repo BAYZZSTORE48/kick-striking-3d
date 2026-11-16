@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kick Striking 3D V3</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1019;color:#fff;font-family:Arial,sans-serif;touch-action:none}#game{width:100%;height:100%;display:block}
+#hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:12px;pointer-events:none}.health{width:44%}.nm{font-size:12px;font-weight:900;letter-spacing:1px;margin-bottom:5px;text-shadow:0 2px 5px #000}.bar{height:13px;background:#27364a;border:2px solid #fff;border-radius:20px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#26c77c,#a8f17a);width:100%;transition:width .2s}#eh{background:linear-gradient(90deg,#ffb43b,#ff4c55)}
+#round{position:fixed;top:60px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:900;letter-spacing:2px;text-shadow:0 2px 5px #000;white-space:nowrap}
+#profileBtn{position:fixed;right:12px;top:82px;background:#111e31dd;color:white;border:1px solid #ffffff66;border-radius:10px;padding:8px;font-size:10px;font-weight:bold}
+#controls{position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;align-items:end;padding:0 13px;pointer-events:none}#joy{width:118px;height:118px;border:2px solid #ffffff77;background:#ffffff20;border-radius:50%;position:relative;pointer-events:auto;touch-action:none}#knob{position:absolute;left:31px;top:31px;width:52px;height:52px;border-radius:50%;background:#f2f6ffdd;box-shadow:0 3px 12px #0008}
+#actions{display:grid;grid-template-columns:repeat(2,65px);gap:8px;pointer-events:auto}.act{height:56px;border-radius:15px;border:1px solid #ffffff88;background:#182a43e8;color:white;font-size:10px;font-weight:900;touch-action:none}.act.red{background:#a93434}
+#hint{position:fixed;bottom:142px;left:50%;transform:translateX(-50%);font-size:10px;color:#fffc;white-space:nowrap;text-shadow:0 2px 5px #000;pointer-events:none}
+#msg{position:fixed;top:43%;left:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:1000;text-shadow:0 3px 12px #000;display:none;white-space:nowrap}#again{position:fixed;top:57%;left:50%;transform:translateX(-50%);padding:13px 22px;background:#f5bd56;border:0;border-radius:12px;font-weight:900;display:none}
+#setup{position:fixed;inset:0;z-index:5;background:radial-gradient(circle at top,#2c4566,#08101d 72%);display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}.panel{width:min(520px,100%);max-height:96%;overflow:auto;background:#0d1929f5;border:1px solid #ffffff2a;border-radius:20px;padding:19px;box-shadow:0 20px 70px #0009}.logo{font-size:11px;letter-spacing:4px;color:#f5bd56;font-weight:900}.panel h1{font-size:24px;margin:8px 0 4px}.sub{font-size:12px;color:#aebdd0;margin:0 0 15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}.field label{font-size:10px;color:#bdc9d8;font-weight:900;letter-spacing:.7px}input,select{width:100%;padding:11px;border-radius:9px;border:1px solid #ffffff30;background:#19283d;color:white;font-size:14px}input[type=color]{height:42px;padding:4px}.full{grid-column:1/-1}.save{width:100%;padding:14px;border:0;border-radius:11px;background:linear-gradient(135deg,#ffda7a,#e99c37);font-weight:1000;margin-top:5px}.note{font-size:10px;line-height:1.4;color:#8fa2ba;margin-top:10px}
+</style></head><body>
+<canvas id="game"></canvas>
+<div id="hud"><div class="health"><div class="nm" id="pname">PLAYER</div><div class="bar"><div class="fill" id="ph"></div></div></div><div class="health" style="text-align:right"><div class="nm">RIVAL CPU</div><div class="bar"><div class="fill" id="eh"></div></div></div></div>
+<div id="round">ROUND 01 · <span id="disciplineHud">KICK STRIKING</span></div><button id="profileBtn">EDIT PROFILE</button>
+<div id="hint">JOYSTICK MOVE · JAB / ELBOW / KICK / BLOCK</div><div id="controls"><div id="joy"><div id="knob"></div></div><div id="actions"><button class="act" id="jab">JAB</button><button class="act" id="elbow">ELBOW</button><button class="act red" id="kick">KICK</button><button class="act" id="block">BLOCK</button></div></div>
+<div id="msg"></div><button id="again">FIGHT AGAIN</button>
+<div id="setup"><div class="panel"><div class="logo">KICK STRIKING 3D</div><h1>Create your fighter</h1><p class="sub">Buat karakter 3D bergaya game open-world klasik.</p><form id="form">
+<div class="field"><label>NAMA FIGHTER</label><input id="name" maxlength="18" placeholder="Contoh: BAYU" required></div>
+<div class="grid"><div class="field"><label>WARNA KULIT</label><input id="skin" type="color" value="#bd805c"></div><div class="field"><label>WARNA RAMBUT</label><input id="hair" type="color" value="#20202a"></div>
+<div class="field"><label>JENIS RAMBUT</label><select id="hairtype"><option value="short">Short</option><option value="spiky">Spiky</option><option value="long">Long</option><option value="bald">Bald</option></select></div>
+<div class="field"><label>IDENTITAS</label><select id="identity"><option value="fighter">Fighter</option><option value="influencer">Influencer</option></select></div>
+<div class="field full"><label>GAYA PERTARUNGAN</label><select id="discipline"><option>Kick Striking</option><option>Kick Boxing</option><option>Boxing</option><option>Muay Thai</option></select></div></div>
+<button class="save">SAVE PROFILE & ENTER RING</button><p class="note">Profil disimpan di browser/perangkat ini. Browser yang sama akan mengingat pengaturanmu saat game dibuka lagi.</p></form></div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const $=id=>document.getElementById(id),scene=new THREE.Scene();scene.background=new THREE.Color(0x91b7ca);scene.fog=new THREE.Fog(0x91b7ca,18,42);
+const renderer=new THREE.WebGLRenderer({canvas:$('game'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;
+const camera=new THREE.PerspectiveCamera(46,innerWidth/innerHeight,.1,100);camera.position.set(0,7.4,13);
+scene.add(new THREE.HemisphereLight(0xffffff,0x536070,2));const sun=new THREE.DirectionalLight(0xffffff,2.2);sun.position.set(-5,10,7);sun.castShadow=true;scene.add(sun);
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.82});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),mat(0x596b64));ground.rotation.x=-Math.PI/2;ground.position.y=-.25;ground.receiveShadow=true;scene.add(ground);
+const platform=new THREE.Mesh(new THREE.BoxGeometry(10,.3,10),mat(0x263e5c));platform.position.y=-.05;platform.receiveShadow=true;scene.add(platform);
+const ringTop=new THREE.Mesh(new THREE.PlaneGeometry(9.7,9.7),mat(0x3979a5));ringTop.rotation.x=-Math.PI/2;ringTop.position.y=.11;scene.add(ringTop);
+const rope=mat(0xe8edf2);function rail(x,z,w,d,y){let o=new THREE.Mesh(new THREE.BoxGeometry(w,.07,d),rope);o.position.set(x,y,z);scene.add(o)}for(let y of [1,1.45,1.9]){rail(0,-4.8,9.8,.07,y);rail(0,4.8,9.8,.07,y);rail(-4.8,0,.07,9.8,y);rail(4.8,0,.07,9.8,y)}
+for(let x of [-4.8,4.8])for(let z of [-4.8,4.8]){let p=new THREE.Mesh(new THREE.BoxGeometry(.16,2,.16),rope);p.position.set(x,1,z);scene.add(p)}
+for(let i=0;i<30;i++){let b=new THREE.Mesh(new THREE.BoxGeometry(.35,.55,.3),mat(i%2?0x354355:0x526171));b.position.set(-9+(i%15)*1.3,.05,-7-Math.floor(i/15)*1.2);scene.add(b)}
+const sphere=new THREE.SphereGeometry(1,10,8),box=new THREE.BoxGeometry(1,1,1);
+function mesh(g,m,parent,x,y,z,sx=1,sy=1,sz=1){let o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function limb(parent,a,b,r,material){let v=new THREE.Vector3().subVectors(b,a),o=new THREE.Mesh(new THREE.CylinderGeometry(r*.82,r,v.length(),8),material);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());o.castShadow=true;parent.add(o);return o}
+function setLimb(o,a,b){let v=new THREE.Vector3().subVectors(b,a);o.position.copy(a).add(b).multiplyScalar(.5);o.scale.y=v.length()/o.geometry.parameters.height;o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize())}
+function makePerson(opt={},isEnemy=false){
+ let root=new THREE.Group(),body=new THREE.Group();root.add(body);scene.add(root);
+ let skin=mat(opt.skin||'#bd805c'),hair=mat(opt.hair||'#211c18'),shirt=mat(isEnemy?0xc63b37:(opt.identity==='influencer'?0x784dcc:0x2468d8)),pants=mat(isEnemy?0x56232b:0x172b47),shoe=mat(0x20232a),glove=mat(isEnemy?0x242424:0x171d27);
+ // Proportioned low-poly human: torso, neck, head, shorts, shoes.
+ mesh(new THREE.CylinderGeometry(.22,.29,.72,8),shirt,body,0,1.42,0,.95,1,.7);
+ mesh(new THREE.CylinderGeometry(.17,.2,.3,8),pants,body,0,.88,0,1,1,.8);
+ mesh(new THREE.CylinderGeometry(.065,.07,.16,7),skin,body,0,1.86,0);
+ mesh(sphere,skin,body,0,2.12,0,.205,.255,.2);
+ if(opt.hairtype!=='bald'){mesh(sphere,hair,body,0,2.29,-.02,.215,.12,.21);
+  if(opt.hairtype==='spiky')for(let i=0;i<5;i++)mesh(new THREE.ConeGeometry(.055,.17,5),hair,body,-.15+i*.075,2.43,0,1,1,1);
+  if(opt.hairtype==='long')mesh(box,hair,body,0,2.11,-.18,.3,.36,.09);
+ }
+ // Face details
+ const eye=mat(0x171717);mesh(box,eye,body,-.075,2.13,.183,.025,.025,.012);mesh(box,eye,body,.075,2.13,.183,.025,.025,.012);
+ const rig={};const shoulderL=new THREE.Vector3(-.27,1.68,0),shoulderR=new THREE.Vector3(.27,1.68,0);
+ rig.upperL=limb(body,shoulderL,new THREE.Vector3(-.4,1.36,0),.085,skin);rig.foreL=limb(body,new THREE.Vector3(-.4,1.36,0),new THREE.Vector3(-.4,1.08,.1),.07,skin);
+ rig.upperR=limb(body,shoulderR,new THREE.Vector3(.4,1.36,0),.085,skin);rig.foreR=limb(body,new THREE.Vector3(.4,1.36,0),new THREE.Vector3(.4,1.08,.1),.07,skin);
+ rig.gloveL=mesh(sphere,glove,body,-.4,1.02,.13,.105,.11,.12);rig.gloveR=mesh(sphere,glove,body,.4,1.02,.13,.105,.11,.12);
+ rig.thighL=limb(body,new THREE.Vector3(-.13,.82,0),new THREE.Vector3(-.15,.43,0),.105,pants);rig.shinL=limb(body,new THREE.Vector3(-.15,.43,0),new THREE.Vector3(-.15,.13,0),.075,skin);
+ rig.thighR=limb(body,new THREE.Vector3(.13,.82,0),new THREE.Vector3(.15,.43,0),.105,pants);rig.shinR=limb(body,new THREE.Vector3(.15,.43,0),new THREE.Vector3(.15,.13,0),.075,skin);
+ rig.shoeL=mesh(box,shoe,body,-.15,.09,.09,.17,.13,.31);rig.shoeR=mesh(box,shoe,body,.15,.09,.09,.17,.13,.31);
+ rig.elL=mesh(sphere,skin,body,-.4,1.36,0,.085,.085,.085);rig.elR=mesh(sphere,skin,body,.4,1.36,0,.085,.085,.085);
+ rig.kneeL=mesh(sphere,skin,body,-.15,.43,0,.095,.095,.095);rig.kneeR=mesh(sphere,skin,body,.15,.43,0,.095,.095,.095);
+ root.userData={body,rig,phase:Math.random()*6,action:'',time:0,hit:0,guard:false};return root;
+}
+let profile=null,player=makePerson(),enemy=makePerson({},true);player.position.set(-1.4,0,2);enemy.position.set(1.4,0,-2);
+let hp=100,ehp=100,ended=true,enemyWait=1,blocking=false;
+function pose(f,dt,walking=false){let u=f.userData,r=u.rig;u.phase+=dt*(walking?8:2.5);let bob=walking?Math.abs(Math.sin(u.phase))*.025:Math.sin(u.phase)*.008;u.body.position.y=bob;
+ let q=u.action?1-u.time/(u.action==='kick'?.62:u.action==='elbow'?.48:.38):0,w=u.action?Math.sin(Math.PI*Math.max(0,Math.min(1,q))):0;
+ let jab=u.action==='jab'?w:0,elbow=u.action==='elbow'?w:0,kick=u.action==='kick'?w:0;
+ let shL=new THREE.Vector3(-.27,1.68,0),shR=new THREE.Vector3(.27,1.68,0);
+ let eL=new THREE.Vector3(-.4,1.36,0),eR=new THREE.Vector3(.4,1.36,0),fL=new THREE.Vector3(-.4,1.08,.12),fR=new THREE.Vector3(.4,1.08,.12);
+ // Resting guard is at chest height, arms remain bent rather than dangling.
+ eL.set(-.38,1.48,.04);eR.set(.38,1.48,.04);fL.set(-.33,1.36,.2);fR.set(.33,1.36,.2);
+ if(f===player&&blocking){fL.y=fR.y=1.53;fL.z=fR.z=.24;eL.y=eR.y=1.58}
+ // Punch is a forward extension then a clean return to guard.
+ fR.x+=jab*.12;fR.y+=jab*.02;fR.z+=jab*.62;eR.x+=jab*.08;eR.z+=jab*.28;
+ // Elbow is a compact bent-arm swing, not a straight arm lift.
+ eR.x-=elbow*.17;eR.y+=elbow*.02;eR.z+=elbow*.3;fR.x-=elbow*.23;fR.y+=elbow*.1;fR.z+=elbow*.42;
+ let hipL=new THREE.Vector3(-.13,.82,0),hipR=new THREE.Vector3(.13,.82,0),kL=new THREE.Vector3(-.15,.43,walking?Math.sin(u.phase)*.07:0),kR=new THREE.Vector3(.15,.43,walking?-Math.sin(u.phase)*.07:0),aL=new THREE.Vector3(-.15,.13,walking?Math.sin(u.phase)*.12:0),aR=new THREE.Vector3(.15,.13,walking?-Math.sin(u.phase)*.12:0);
+ // Stylized arcade kick: knee rises, lower leg extends forward, then returns.
+ kR.y+=kick*.2;kR.z+=kick*.3;aR.y+=kick*.42;aR.z+=kick*.72;
+ setLimb(r.upperL,shL,eL);setLimb(r.foreL,eL,fL);setLimb(r.upperR,shR,eR);setLimb(r.foreR,eR,fR);
+ r.gloveL.position.copy(fL);r.gloveR.position.copy(fR);r.elL.position.copy(eL);r.elR.position.copy(eR);
+ setLimb(r.thighL,hipL,kL);setLimb(r.shinL,kL,aL);setLimb(r.thighR,hipR,kR);setLimb(r.shinR,kR,aR);
+ r.kneeL.position.copy(kL);r.kneeR.position.copy(kR);r.shoeL.position.copy(aL);r.shoeR.position.copy(aR);
+}
+function bars(){$('ph').style.width=hp+'%';$('eh').style.width=ehp+'%'}
+function finish(t){ended=true;$('msg').textContent=t;$('msg').style.display='block';$('again').style.display='block'}
+function attack(type){if(ended||player.userData.action)return;player.userData.action=type;player.userData.time=type==='kick'?.62:type==='elbow'?.48:.38;let d=player.position.distanceTo(enemy.position);if(d<(type==='kick'?2.5:2.05)){ehp=Math.max(0,ehp-(type==='kick'?12:type==='elbow'?10:8));enemy.userData.hit=.2;enemy.userData.action='react';enemy.userData.time=.22;bars();if(ehp<=0)finish('YOU WIN!')}}
+for(let [id,t] of [['jab','jab'],['elbow','elbow'],['kick','kick']])$(id).onpointerdown=e=>{e.preventDefault();attack(t)};
+$('block').onpointerdown=e=>{e.preventDefault();blocking=true};$('block').onpointerup=()=>blocking=false;$('block').onpointercancel=()=>blocking=false;
+$('again').onclick=()=>{hp=ehp=100;ended=false;enemyWait=1;player.position.set(-1.4,0,2);enemy.position.set(1.4,0,-2);$('msg').style.display='none';$('again').style.display='none';bars()};
+let joy={x:0,y:0},pid=null,joyEl=$('joy'),knob=$('knob');function move(e){let b=joyEl.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2,l=Math.hypot(x,y),s=l>35?35/l:1;joy.x=x*s/35;joy.y=y*s/35;knob.style.transform=`translate(${x*s}px,${y*s}px)`}joyEl.onpointerdown=e=>{pid=e.pointerId;joyEl.setPointerCapture(pid);move(e)};joyEl.onpointermove=e=>{if(e.pointerId===pid)move(e)};function release(e){if(e.pointerId===pid){pid=null;joy={x:0,y:0};knob.style.transform='translate(0,0)'}}joyEl.onpointerup=release;joyEl.onpointercancel=release;
+function saved(){try{return JSON.parse(localStorage.getItem('kickStrikingProfile')||'null')}catch{return null}}
+function fillForm(p){$('name').value=p.name||'';$('skin').value=p.skin||'#bd805c';$('hair').value=p.hair||'#211c18';$('hairtype').value=p.hairtype||'short';$('identity').value=p.identity||'fighter';$('discipline').value=p.discipline||'Kick Striking'}
+function setPlayer(p){scene.remove(player);player=makePerson(p);player.position.set(-1.4,0,2)}
+function edit(){let p=profile||saved();if(p)fillForm(p);$('setup').style.display='flex'}$('profileBtn').onclick=edit;
+$('form').onsubmit=e=>{e.preventDefault();profile={name:$('name').value.trim()||'PLAYER',skin:$('skin').value,hair:$('hair').value,hairtype:$('hairtype').value,identity:$('identity').value,discipline:$('discipline').value};localStorage.setItem('kickStrikingProfile',JSON.stringify(profile));setPlayer(profile);$('pname').textContent=profile.name.toUpperCase();$('disciplineHud').textContent=profile.discipline.toUpperCase();$('setup').style.display='none';hp=ehp=100;ended=false;bars();$('msg').style.display='none';$('again').style.display='none'};
+profile=saved();if(profile){fillForm(profile);setPlayer(profile);$('pname').textContent=profile.name.toUpperCase();$('disciplineHud').textContent=profile.discipline.toUpperCase();$('setup').style.display='none';ended=false}else $('setup').style.display='flex';
+let last=performance.now();function loop(now){requestAnimationFrame(loop);let dt=Math.min((now-last)/1000,.04);last=now;if(!ended){let walking=Math.hypot(joy.x,joy.y)>.1;player.position.x=THREE.MathUtils.clamp(player.position.x+joy.x*dt*3,-4,4);player.position.z=THREE.MathUtils.clamp(player.position.z+joy.y*dt*3,-4,4);let dx=enemy.position.x-player.position.x,dz=enemy.position.z-player.position.z,d=Math.hypot(dx,dz);player.rotation.y=Math.atan2(dx,dz);enemy.rotation.y=Math.atan2(-dx,-dz);enemyWait-=dt;if(d>1.6){enemy.position.x-=dx/d*dt*.72;enemy.position.z-=dz/d*dt*.72}else if(enemyWait<=0){if(!blocking)hp=Math.max(0,hp-6);bars();enemy.userData.action=Math.random()>.5?'kick':'jab';enemy.userData.time=.4;enemyWait=1.25;if(hp<=0)finish('CPU WINS!')}}
+ for(let f of [player,enemy]){let u=f.userData;if(u.action){u.time-=dt;if(u.time<=0)u.action=''}if(u.hit>0){u.hit-=dt;f.position.y=.045}else f.position.y=0;pose(f,dt,f===player?Math.hypot(joy.x,joy.y)>.1:!ended&&f.position.distanceTo(player.position)>1.5)}
+ camera.position.x+=(player.position.x*.2-camera.position.x)*dt*1.4;camera.lookAt(player.position.x*.15,1,0);renderer.render(scene,camera)}
+requestAnimationFrame(loop);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});bars();
+</script></body></html>
